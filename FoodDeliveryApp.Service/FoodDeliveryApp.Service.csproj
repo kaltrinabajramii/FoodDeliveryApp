@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FoodDeliveryApp.Domain\FoodDeliveryApp.Domain.csproj" />
+    <ProjectReference Include="..\FoodDeliveryApp.Repository\FoodDeliveryApp.Repository.csproj" />
+  </ItemGroup>
+
+</Project>
