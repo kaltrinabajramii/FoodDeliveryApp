@@ -73,6 +73,7 @@ namespace FoodDeliveryApp.Service.Implementation
             return _restaurantRepository.GetRestaurant(id);
         }
 
+       
         public void UpdateExistingRestaurant(Restaurant restaurant)
         {
             _restaurantRepository.Update(restaurant);

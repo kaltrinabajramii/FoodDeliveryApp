@@ -2,6 +2,8 @@
 using FoodDeliveryApp.Domain.DomainModels;
 using FoodDeliveryApp.Service.Interface;
 using FoodDeliveryApp.Domain.DTO;
+using FoodDeliveryApp.Service.Implementation;
+using System.Security.Claims;
 
 namespace FoodDeliveryApp.Web.Controllers
 {
@@ -10,12 +12,14 @@ namespace FoodDeliveryApp.Web.Controllers
         private readonly IFoodItemService _foodItemService;
         private readonly IRestaurantService _restaurantService;
         private readonly IExtraService _extraService;
+        private readonly IShoppingCartService _shoppingCartService;
 
-        public FoodItemsController(IFoodItemService foodItemService, IRestaurantService restaurantService, IExtraService extraService)
+        public FoodItemsController(IFoodItemService foodItemService, IRestaurantService restaurantService, IExtraService extraService, IShoppingCartService shoppingCartService)
         {
             _foodItemService = foodItemService;
             _restaurantService = restaurantService;
             _extraService = extraService;
+            _shoppingCartService = shoppingCartService;
         }
 
         public IActionResult Index()
@@ -136,6 +140,48 @@ namespace FoodDeliveryApp.Web.Controllers
             }
             return View(viewModel);
         }
+        [HttpPost]
+        public async Task<IActionResult> AddToCartConfirmed(FoodItemInCart model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            _shoppingCartService.AddToShoppingConfirmed(model, userId);
+            return RedirectToAction("Index", "ShoppingCart");
+        }
+        public async Task<IActionResult> AddToCart(Guid? Id)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+
+            // Retrieve the FoodItem using the provided Id
+            var foodItem = _foodItemService.GetFoodItemById((Guid)Id);
+
+            if (foodItem == null)
+            {
+                return NotFound();
+            }
+
+            // Create a new instance of FoodItemInCart
+            FoodItemInCart foodItemInCart = new FoodItemInCart
+            {
+                // Set the FoodItemId to the retrieved FoodItem's Id
+                FoodItemId = foodItem.Id
+            };
+
+            // Pass the FoodItemInCart object to the view
+            return View(foodItemInCart);
+        }
+        public IActionResult LoadAddToCartModal(Guid foodItemId)
+        {
+            var model = new FoodItemInCart
+            {
+                FoodItemId = foodItemId,
+                // Initialize other properties as needed
+            };
+            return PartialView("_AddToCartModal", model);
+        }
+
 
     }
 }

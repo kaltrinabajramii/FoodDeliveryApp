@@ -7,6 +7,7 @@ using FoodDeliveryApp.Repository.Interface;
 using FoodDeliveryApp.Repository.Implementation;
 using FoodDeliveryApp.Service.Interface;
 using FoodDeliveryApp.Service.Implementation;
+using NuGet.Protocol.Core.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +22,14 @@ builder.Services.AddDefaultIdentity<Customer>(options => options.SignIn.RequireC
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped(typeof(IRestaurantRepository), typeof(RestaurantRepository));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped(typeof(IFoodItemRepository), typeof(FoodItemRepository));
 builder.Services.AddScoped(typeof(IExtraRepository), typeof(ExtraRepository));
 builder.Services.AddScoped(typeof(IReviewRepository), typeof(ReviewRepository));
 builder.Services.AddScoped(typeof(ICustomerRepository), typeof(CustomerRepository));
 
 builder.Services.AddTransient<IRestaurantService, RestaurantService>();
+builder.Services.AddTransient<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IFoodItemService, FoodItemService>();
 builder.Services.AddTransient<IExtraService, ExtraService>();
 

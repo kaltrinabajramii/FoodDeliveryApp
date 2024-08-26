@@ -33,11 +33,13 @@ namespace FoodDeliveryApp.Repository.Implementation
                 .FirstOrDefault();
         }
 
+
         public IEnumerable<Restaurant> GetAll()
         {
             return entities.AsEnumerable();
         }
 
+       
         public void Insert(Restaurant restaurant)
         {
             if (restaurant == null)
@@ -67,6 +69,9 @@ namespace FoodDeliveryApp.Repository.Implementation
             entities.Remove(restaurant);
             context.SaveChanges();
         }
+
+       
+
     }
-    
+
 }

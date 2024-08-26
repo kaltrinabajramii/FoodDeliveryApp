@@ -1,0 +1,79 @@
+﻿﻿@using Microsoft.Extensions.Options
+@model FoodDeliveryApp.Domain.DTO.ShoppingCartDTO
+
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<h2>Your shopping cart includes:</h2>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                #
+            </th>
+            <th>
+                Food Item 
+            </th>
+            <th>
+                Restaurant
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Quantity
+            </th>
+            <th>
+                Extras
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.FoodItemsInCarts.Count(); i++)
+        {
+            var item = Model.FoodItemsInCarts[i];
+            <tr>
+                <td>@(i + 1)</td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FoodItem.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem=>item.FoodItem.Restaurant.Name)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.FoodItem.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FoodItem.Extras.Count)
+                </td>
+                <td>
+                    |
+                    <a asp-action="Delete" asp-controller="ShoppingCart" asp-route-id="@item.FoodItem.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+    <th><b>Total:</b></th>
+
+    <th></th>
+    <th></th>
+    <th></th>
+
+    <th><b>@Model.TotalPrice</b></th>
+
+    </tfoot>
+</table>
+<div style="float:center">
+
+<a  asp-controller="ShoppingCart" asp-action="Order" class="btn btn-primary">Order Now</a>
+</div>

@@ -5,15 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace FoodDeliveryApp.Repository.Interface
 {
-    public interface IFoodItemRepository
+    public interface IRepository<T> where T : BaseEntity
     {
-        void Delete(FoodItem foodItem);
-       
-        FoodItem GetById(Guid id);
-        void Save(FoodItem foodItem);
-        void Update(FoodItem foodItem);
+        IEnumerable<T> GetAll();
+        T Get(Guid? Id);
+        void Insert(T entity);
+        void Update(T entity);
+        void Delete(T entity);
+
+
     }
 }

@@ -10,6 +10,7 @@ using FoodDeliveryApp.Repository;
 using FoodDeliveryApp.Service.Interface;
 using FoodDeliveryApp.Domain.DTO;
 using System.Security.Claims;
+using FoodDeliveryApp.Service.Implementation;
 
 namespace FoodDeliveryApp.Web.Controllers
 {
@@ -31,6 +32,21 @@ namespace FoodDeliveryApp.Web.Controllers
 
         // GET: Restaurants/Details/5
         public IActionResult Details(Guid? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var restaurant = _restaurantService.GetDetails(id);
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+
+            return View(restaurant);
+        }
+        public IActionResult GetMenu(Guid? id)
         {
             if (id == null)
             {
@@ -166,5 +182,7 @@ namespace FoodDeliveryApp.Web.Controllers
         {
             return _restaurantService.GetDetails(id) != null;
         }
+       
+
     }
 }

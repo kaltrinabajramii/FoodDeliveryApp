@@ -1,8 +1,28 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<FoodDeliveryApp.Domain.Identity.Customer> SignInManager
+@inject UserManager<FoodDeliveryApp.Domain.Identity.Customer> UserManager
+@{
     ViewData["Title"] = "Home Page";
 }
+<body style="background-color:#fffcf4">
 
+@if (SignInManager.IsSignedIn(User))
+{
+    
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+        <img src="~/images/LOGO.png" style="width:400px;height:400px;"/>
+        <br>
+    <a asp-controller="Restaurants" asp-action="Index" class="btn btn-success">See Restaurants</a>
+   
 </div>
+  
+
+}
+else
+{
+    <h2>Please Sign In or Register to use the app</h2>
+    <a class="btn btn-info" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    <a class="btn btn-info" asp-area="Identity" asp-page="/Account/Register">Register</a>
+}
+
+</body>

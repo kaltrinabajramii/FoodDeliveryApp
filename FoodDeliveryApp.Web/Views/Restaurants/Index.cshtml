@@ -19,22 +19,24 @@
             @:<div class="row">
         }
         <div class="col-3 m-4">
+            <a asp-controller="Restaurants" asp-action="Details" asp-route-id="@item.Id" style="text-decoration: none; color: inherit;">
 
             <div class="card" style="width: 18rem; height: 35rem">
                 <img class="card-img-top" src="@item.ImageUrl" style="height: 60%" alt="Card image cap">
                 <div class="card-body">
-                    <h5 class="card-title">@item.Name</h5>
+                                 <h5 class="card-title">@item.Name</h5>
                     <p class="card-text">@item.Address</p>
                     <h6>Rating: @item.AverageRating</h6>
                     <h6>@(item.IsOpen ? "Open" : "Closed")</h6>
                     </div>
                 <div class="card-footer">
                     <a asp-controller="Restaurants" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info">Edit</a>
-                    <a asp-controller="Restaurants" asp-action="Details" asp-route-id="@item.Id" class="btn btn-success">See MENU</a>
+                    <a asp-controller="Restaurants" asp-action="GetMenu" asp-route-id="@item.Id" class="btn btn-success">See MENU</a>
                     <a asp-controller="Restaurants" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
                 </div>
 
             </div>
+            </a>
         </div>
 
         if(i % 3 == 2)
@@ -43,4 +45,6 @@
         }
     }
 </div>
+
+
 

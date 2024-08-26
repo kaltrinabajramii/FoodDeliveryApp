@@ -8,6 +8,9 @@ namespace FoodDeliveryApp.Service.Interface
     {
         void CreateNewFoodItem(CreateFoodItemViewModel viewModel);
         void DeleteFoodItem(Guid id);
+       
+         
+
         FoodItem GetFoodItemById(Guid id);
         void UpdateFoodItem(EditFoodItemViewModel viewModel);
     }

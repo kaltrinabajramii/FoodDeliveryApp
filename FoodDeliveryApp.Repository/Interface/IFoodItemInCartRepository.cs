@@ -5,15 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace FoodDeliveryApp.Repository.Interface
 {
-    public interface IFoodItemRepository
+    public interface IFoodItemInCartRepository
     {
-        void Delete(FoodItem foodItem);
-       
-        FoodItem GetById(Guid id);
-        void Save(FoodItem foodItem);
-        void Update(FoodItem foodItem);
+        void Delete(FoodItemInCart foodItem);
+
+        FoodItemInCart GetById(Guid id);
+        void Save(FoodItemInCart foodItem);
+        void Update(FoodItemInCart foodItem);
     }
 }

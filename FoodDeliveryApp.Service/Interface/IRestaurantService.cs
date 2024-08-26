@@ -14,6 +14,7 @@ namespace FoodDeliveryApp.Service.Interface
         void CreateNewRestaurant(Restaurant restaurant);
         void DeleteRestaurant(Guid id);
         List<Restaurant> GetAllRestaurants();
+        
         Restaurant GetDetails(Guid? id);
         void UpdateExistingRestaurant(Restaurant restaurant);
     }

@@ -15,4 +15,8 @@
     <ProjectReference Include="..\FoodDeliveryApp.Domain\FoodDeliveryApp.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
