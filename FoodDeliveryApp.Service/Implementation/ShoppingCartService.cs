@@ -12,6 +12,8 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using FoodDeliveryApp.Domain.Email;
 
 namespace FoodDeliveryApp.Service.Implementation
 {
@@ -23,17 +25,22 @@ namespace FoodDeliveryApp.Service.Implementation
         private readonly ApplicationDbContext _context;
         private readonly  IRepository<FoodItemInCart> _foodItemInCartRepository;
         private readonly ICustomerRepository _userRepository;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IEmailService _emailService;
         
         public ShoppingCartService(IRepository<ShoppingCart> shoppingCartRepository,
             IRepository<FoodItemInCart> foodItemInCartRepository,
-            ApplicationDbContext context,
-            ICustomerRepository userRepository, ILogger<ShoppingCartService> logger)
+            ApplicationDbContext context, IRepository<Order> orderRepository,
+            ICustomerRepository userRepository, ILogger<ShoppingCartService> logger,
+            IEmailService emailService)
         {
             _foodItemInCartRepository = foodItemInCartRepository;
             _userRepository = userRepository;
             _shoppingCartRepository=shoppingCartRepository;
             _logger = logger;
             _context = context;
+            _orderRepository = orderRepository;
+            _emailService = emailService;
             
         }
         
@@ -113,5 +120,69 @@ namespace FoodDeliveryApp.Service.Implementation
             return model;
         }
 
+        public bool Order(string userID)
+        {
+            if (!string.IsNullOrEmpty(userID))
+            {
+                var loggedInUser = this._userRepository.GetCustomer(userID);
+                var userCart = loggedInUser.ShoppingCart;
+                /*Email here for order*/
+                EmailMessage emailmessage = new EmailMessage();
+                emailmessage.Subject = "Ordered succesfully!";
+                emailmessage.MailTo = loggedInUser.Email;
+
+                Order order = new Order
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = userID,
+                    OrderDate = DateTime.Now,
+                    Status = 0,
+                    TotalAmount = userCart.FoodItemsInCart.Sum(f => f.FoodItem.Price * f.Quantity),
+                    RestaurantId = userCart.FoodItemsInCart.First().FoodItem.RestaurantId,
+                   
+                };
+                order.FoodItemsInOrder=userCart.FoodItemsInCart.Select(f=> new FoodItemInOrder
+                {
+                    Id=Guid.NewGuid(),
+                    OrderId=order.Id,
+                    FoodItemId=f.FoodItemId,
+                    FoodItem=f.FoodItem,
+                    Quantity=f.Quantity,
+                   
+                }).ToList();
+
+                StringBuilder sb = new StringBuilder();
+
+                var totalPrice = 0.0;
+
+                sb.AppendLine("Your order is completed. The order conatins: ");
+                sb.AppendLine();
+
+                foreach(var item in order.FoodItemsInOrder)
+                {
+                    sb.AppendLine($"- {item.FoodItem.Name} (Quantity: {item.Quantity}, Price: {item.FoodItem.Price:C})");
+                }
+                sb.AppendLine();
+                sb.AppendLine("Total price for your order: "+ order.TotalAmount.ToString("C"));
+                sb.AppendLine();
+                sb.AppendLine("Thank you for ordering!");
+
+                emailmessage.Content = sb.ToString();
+                this._emailService.SendEmailMessage(emailmessage);
+                       
+
+                this._orderRepository.Insert(order);
+                userCart.FoodItemsInCart.Clear();
+                this._userRepository.Update(loggedInUser);
+               
+
+                return true;
+
+                
+
+                
+            }
+            return false;
+        }
     }
 }

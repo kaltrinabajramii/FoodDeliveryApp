@@ -57,7 +57,7 @@
                 </td>
                 <td>
                     |
-                    <a asp-action="Delete" asp-controller="ShoppingCart" asp-route-id="@item.FoodItem.Id">Delete</a>
+                    <a asp-action="Delete" asp-controller="ShoppingCart" asp-route-id="@item.FoodItem.Id" class="btn btn-danger">Delete</a>
                 </td>
             </tr>
         }
@@ -73,7 +73,39 @@
 
     </tfoot>
 </table>
-<div style="float:center">
 
-<a  asp-controller="ShoppingCart" asp-action="Order" class="btn btn-primary">Order Now</a>
+<div style="text-align:center">
+    @if (Model.FoodItemsInCarts.Count > 0)
+    {
+        <div id="modalPlaceholder"></div>
+        <a href="#" class="btn btn-primary" onclick="orderNow()">Order Now</a>
+    }
 </div>
+
+<script type="text/javascript">
+    function orderNow() {
+        $.ajax({
+            url: '@Url.Action("PayOrder", "ShoppingCart")',
+            type: 'GET',
+            success: function (data) {
+                $('#modalPlaceholder').html(data);
+                $('#orderSuccesfulModal').modal('show');
+            },
+            error: function () {
+                alert("There was an error processing your order. Please try again.");
+            }
+        });
+    }
+
+
+    function loadModal() {
+        $.ajax({
+            url: '@Url.Action("PayOrder", "ShoppingCart")',
+            type: 'GET',
+            success: function (data) {
+                $('#modalPlaceholder').html(data);
+                $('#orderSuccesfulModal').modal('show');
+            }
+        });
+    }
+</script>

@@ -10,5 +10,7 @@ namespace FoodDeliveryApp.Repository.Interface
     public interface ICustomerRepository
     {
         Customer GetCustomer(string? Id);
+         void Update(Customer customer);
+
     }
 }

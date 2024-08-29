@@ -38,5 +38,15 @@ namespace FoodDeliveryApp.Repository.Implementation
                 .Where(c => c.Id.Equals(Id))
                 .FirstOrDefault();
         }
+
+        public void Update(Customer customer)
+        {
+            if (customer == null)
+            {
+                throw new ArgumentNullException("custumer");
+            }
+            entities.Update(customer);
+            context.SaveChanges();
+        }
     }
 }

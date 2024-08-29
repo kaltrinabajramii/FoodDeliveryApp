@@ -32,6 +32,7 @@ builder.Services.AddTransient<IRestaurantService, RestaurantService>();
 builder.Services.AddTransient<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IFoodItemService, FoodItemService>();
 builder.Services.AddTransient<IExtraService, ExtraService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>

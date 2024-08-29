@@ -43,7 +43,34 @@ namespace FoodDeliveryApp.Web.Controllers
                 return RedirectToAction("Index", "ShoppingCart");
             }
         }
-        
+        public Boolean Order() 
+        {
+            var userId=User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result=this._shoppingCartService.Order(userId);
+            return result;
+        }
+        public IActionResult PayOrder()
+        {
+           var result= this.Order();
+            if (result)
+            {
+
+            return PartialView("_OrderSuccesfulModal");
+            }
+            else
+            {
+                return StatusCode(505);
+            }
+        }
+      
+
+
+        /* public IActionResult PayOrder(string StripeEmail,string StripeToken) 
+         {
+         stripe settings     
+
+         }*/
+
 
     }
 }

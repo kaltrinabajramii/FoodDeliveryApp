@@ -1,4 +1,5 @@
 ﻿using FoodDeliveryApp.Domain.DomainModels;
+using FoodDeliveryApp.Domain.Email;
 using FoodDeliveryApp.Domain.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace FoodDeliveryApp.Repository
         public DbSet<ExtraInFoodItem> ExtraInFoodItems { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<FoodItemInCart> FoodItemsInCart { get; set; }
+        public DbSet<EmailMessage> EmailMessages { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<FoodItemInOrder> FoodItemsInOrder { get; set; }
         public DbSet<Review> Reviews { get; set; }
