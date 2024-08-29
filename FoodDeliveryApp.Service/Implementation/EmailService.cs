@@ -33,11 +33,11 @@ namespace FoodDeliveryApp.Service.Implementation
                 {
                     var socketOptions = SecureSocketOptions.Auto;
 
-                    await smtp.ConnectAsync("smtp-mail.outlook.com", 587, socketOptions);
+                    await smtp.ConnectAsync("smtp.gmail.com", 587, socketOptions);
 
                     if (!string.IsNullOrEmpty("gresalika66@gmail.com"))
                     {
-                        await smtp.AuthenticateAsync("gresalika66@gmail.com", "babyShark13#");
+                        await smtp.AuthenticateAsync("gresalika66@gmail.com", "ipoo mbuo nsnx ohch");
                     }
                     await smtp.SendAsync(emailmessage);
 

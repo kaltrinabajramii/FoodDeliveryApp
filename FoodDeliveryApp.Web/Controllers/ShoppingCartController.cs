@@ -65,12 +65,7 @@ namespace FoodDeliveryApp.Web.Controllers
       
 
 
-        /* public IActionResult PayOrder(string StripeEmail,string StripeToken) 
-         {
-         stripe settings     
-
-         }*/
-
+        
 
     }
 }
