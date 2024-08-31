@@ -2,7 +2,9 @@
 using FoodDeliveryApp.Repository;
 using FoodDeliveryApp.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
+using Stripe;
 using System.Security.Claims;
 
 namespace FoodDeliveryApp.Web.Controllers
@@ -24,7 +26,11 @@ namespace FoodDeliveryApp.Web.Controllers
             return View(this._shoppingCartService.GetInfoShoppingCart(userId));
         }
 
-        public IActionResult SuccessPayment()
+        public IActionResult SuccessfulPayment()
+        {
+            return View();
+        }
+        public IActionResult FailedPayment()
         {
             return View();
         }
@@ -49,18 +55,41 @@ namespace FoodDeliveryApp.Web.Controllers
             var result=this._shoppingCartService.Order(userId);
             return result;
         }
-        public IActionResult PayOrder()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult PayOrder(string stripeEmail, string stripeToken)
         {
-           var result= this.Order();
-            if (result)
-            {
+            StripeConfiguration.ApiKey = "sk_test_51P9ow2EbutLVS09jca4drAXy47BOqmYvmBOIvBZ3y6sXXc8FOZWTaKP3LuuxV2xeBwxrxg9EgKktiB3kXLr2V55K00xU0sqwii";
+            var customerService = new CustomerService();
+            var chargeService = new ChargeService();
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return PartialView("_OrderSuccesfulModal");
-            }
-            else
+            var order = this._shoppingCartService.GetInfoShoppingCart(userId);
+
+            var customer = customerService.Create(new CustomerCreateOptions
             {
-                return StatusCode(505);
+                Email = stripeEmail,
+                Source = stripeToken
+            });
+
+            var charge = chargeService.Create(new ChargeCreateOptions
+            {
+                Amount = (Convert.ToInt32(order.TotalPrice) * 100),
+                Description = "Foodie Deliveries Payment",
+                Currency = "mkd",
+                Customer = customer.Id
+            });
+            if (charge.Status == "succeeded")
+            {
+                this.Order();
+                return RedirectToAction("SuccessfulPayment", "ShoppingCart");
             }
+            else {
+                
+                return RedirectToAction("FailedPayment", "ShoppingCart");
+            
+            }
+          
         }
       
 

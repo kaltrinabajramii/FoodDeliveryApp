@@ -1,5 +1,6 @@
 ﻿﻿@using Microsoft.Extensions.Options
 @model FoodDeliveryApp.Domain.DTO.ShoppingCartDTO
+@inject IOptions<FoodDeliveryApp.Domain.StripeSettings> Stripe
 
 
 @{
@@ -78,7 +79,20 @@
     @if (Model.FoodItemsInCarts.Count > 0)
     {
         <div id="modalPlaceholder"></div>
-        <a href="#" class="btn btn-primary" onclick="orderNow()">Order Now</a>
+        
+        <form asp-controller="ShoppingCart" asp-action="PayOrder" method="post">
+        <article>
+            <script src="https://checkout.stripe.com/checkout.js"
+                    class="stripe-button"
+                    data-key="@Stripe.Value.PublishableKey"
+                    data-locale="auto"
+                    data-description="Foodie Deliveries Payment"
+                    data-amount="@(Model.TotalPrice * 100)"
+                    data-label="Pay $@Model.TotalPrice">
+            </script>
+        </article>
+
+        </form>
     }
 </div>
 

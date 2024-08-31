@@ -8,6 +8,8 @@ using FoodDeliveryApp.Repository.Implementation;
 using FoodDeliveryApp.Service.Interface;
 using FoodDeliveryApp.Service.Implementation;
 using NuGet.Protocol.Core.Types;
+using FoodDeliveryApp.Domain;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<Customer>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<FoodDeliveryApp.Domain.Identity.Customer>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -33,7 +35,11 @@ builder.Services.AddTransient<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddTransient<IFoodItemService, FoodItemService>();
 builder.Services.AddTransient<IExtraService, ExtraService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<IOrderStatusService, OrderStatusService>();
 
+
+
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

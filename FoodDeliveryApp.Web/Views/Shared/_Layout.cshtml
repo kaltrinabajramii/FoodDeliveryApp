@@ -25,10 +25,19 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="ShoppingCart" asp-action="Index">My Cart</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ShoppingCart" asp-action="Index">View Order Status</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="orderStatusDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                View Order Status
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="orderStatusDropdown">
+                                <!--Don't  know if we should keep the name currently delivering but i ment the current order that the user wants to track-->
+                                <li><a class="dropdown-item" asp-area="" asp-controller="ViewStatus" asp-action="Index" data-bs-toggle="modal" data-bs-target="#orderModal">Order Status </a>></li>
+                                <!--This will be a link to download a pdf of all orders-->
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="History"> Previous orders</a></li>
+                            </ul>
                         </li>
-                    </ul>
+                    </ul><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>
