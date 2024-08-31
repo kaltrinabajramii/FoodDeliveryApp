@@ -10,13 +10,13 @@ namespace FoodDeliveryApp.Service.Implementation
 {
     public class OrderStatusService : IOrderStatusService
     {
-        private readonly ICustomerRepository _customerRepository;
+       
         private readonly IRepository<Domain.DomainModels.Order> _orderRepository;
 
 
-        OrderStatusService(ICustomerRepository customerRepository, IRepository<Domain.DomainModels.Order> orderRepository)
+         public OrderStatusService(IRepository<Domain.DomainModels.Order> orderRepository)
         {
-            _customerRepository = customerRepository;
+            
             _orderRepository = orderRepository;
 
         }
