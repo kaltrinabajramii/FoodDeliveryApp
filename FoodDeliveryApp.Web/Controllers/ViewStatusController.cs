@@ -20,10 +20,11 @@ namespace FoodDeliveryApp.Web.Controllers
         public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid user;
-            Guid.TryParse(userId, out user);
-            _orderStatus.ViewOrderStatus(user);
-            return PartialView("_ViewStatusModal");
+            var order = _customerRepository.GetCustomer(userId);
+            var orderId= order.Orders.FirstOrDefault();
+
+            _orderStatus.ViewOrderStatus(orderId.Id) ;
+            return PartialView("_ViewStatusModal",orderId);
         }
     }
 }

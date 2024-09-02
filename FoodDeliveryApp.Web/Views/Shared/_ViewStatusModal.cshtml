@@ -1,21 +1,17 @@
 ﻿@model FoodDeliveryApp.Domain.DomainModels.Order
 
-<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <h1>Order ID</h1>
-                <p>@Html.DisplayFor(item => item.Id)</p>
-                <h3>Status</h3>
-                <p>@Html.DisplayFor(item => item.Status)</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
+<div class="modal-header">
+    <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <h3>Order ID:</h3>
+    <p>@Model.Id</p>
+
+    <h3>Status:</h3>
+    <p>@Model.Status.ToString()</p>
+</div>
+<!---Here should be your order will be here approximetly: with a timer->
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 </div>
