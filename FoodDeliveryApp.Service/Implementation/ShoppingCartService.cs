@@ -109,7 +109,7 @@ namespace FoodDeliveryApp.Service.Implementation
             }
 
             double totalPrice = shoppingCart.FoodItemsInCart?
-                .Sum(item => (double)(item.Quantity * item.FoodItem.Price)) ?? 0;
+                .Sum(item => (double)((item.Quantity * item.FoodItem.Price)+item.FoodItem.Restaurant.BaseDeliveryFee)) ?? 0;
 
             ShoppingCartDTO model = new ShoppingCartDTO()
             {
@@ -174,6 +174,10 @@ namespace FoodDeliveryApp.Service.Implementation
                 this._orderRepository.Insert(order);
                 userCart.FoodItemsInCart.Clear();
                 this._userRepository.Update(loggedInUser);
+
+               
+
+
                
 
                 return true;

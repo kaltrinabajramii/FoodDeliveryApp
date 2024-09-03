@@ -26,6 +26,9 @@
                 Price
             </th>
             <th>
+                Base Delivery Fee
+            </th>
+            <th>
                 Quantity
             </th>
             <th>
@@ -49,6 +52,9 @@
 
                 <td>
                     @Html.DisplayFor(modelItem => item.FoodItem.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FoodItem.Restaurant.BaseDeliveryFee)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Quantity)

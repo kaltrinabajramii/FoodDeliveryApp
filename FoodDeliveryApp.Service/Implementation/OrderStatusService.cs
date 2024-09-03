@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using FoodDeliveryApp.Domain;
 using FoodDeliveryApp.Domain.DomainModels;
 using Microsoft.Extensions.DependencyInjection;
+using FoodDeliveryApp.Domain.Email;
 
 namespace FoodDeliveryApp.Service.Implementation
 {
@@ -18,11 +19,21 @@ namespace FoodDeliveryApp.Service.Implementation
 
         //scope here is used for Timer since it allows DBcontext to be used in the backround
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IEmailService _emailService;
+        private readonly ICustomerRepository _customerRepository;
 
 
-        public OrderStatusService(IServiceScopeFactory scopeFactory)
+        
+
+
+        public OrderStatusService(IServiceScopeFactory scopeFactory, IRepository<Order> order
+            ,IEmailService emailService,ICustomerRepository customerRepository)
         {
             _scopeFactory = scopeFactory;
+            _orderRepository = order;
+            _emailService = emailService;
+            _customerRepository = customerRepository;
         }
 
         /*this is a timer for changing Status of order 
@@ -51,6 +62,25 @@ namespace FoodDeliveryApp.Service.Implementation
                                     null,
                                     0,
                                     10000);
+           var checkOrder= this._orderRepository.Get(orderId);
+            var loggedInUserId = checkOrder.CustomerId;
+            var loggedInUser = this._customerRepository.GetCustomer(loggedInUserId);
+            if (checkOrder.Status == OrderStatus.Delivered)
+            {
+                EmailMessage deliveredEmail= new EmailMessage();
+                deliveredEmail.Subject = "Order delivered succesfully!";
+                deliveredEmail.MailTo = loggedInUser.Email;
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("Your order has been delivered to Address: " + loggedInUser.Address);
+                sb.AppendLine("");
+                sb.AppendLine("Thank you for ordering with us!");
+                deliveredEmail.Content=sb.ToString();
+                this._emailService.SendEmailMessage(deliveredEmail);
+                
+            }
+
+
         }
 
         private void UpdateOrderStatus(Order order, ApplicationDbContext context)

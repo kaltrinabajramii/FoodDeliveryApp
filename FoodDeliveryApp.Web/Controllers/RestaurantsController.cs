@@ -11,6 +11,7 @@ using FoodDeliveryApp.Service.Interface;
 using FoodDeliveryApp.Domain.DTO;
 using System.Security.Claims;
 using FoodDeliveryApp.Service.Implementation;
+using MailKit.Search;
 
 namespace FoodDeliveryApp.Web.Controllers
 {
@@ -24,9 +25,16 @@ namespace FoodDeliveryApp.Web.Controllers
         }
 
         // GET: Restaurants
-        public IActionResult Index()
+        public IActionResult Index(string searchTerm)
         {
             List<Restaurant> restaurants = _restaurantService.GetAllRestaurants();
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                restaurants = restaurants.Where(r => r.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            ViewData["CurrentFilter"] = searchTerm;
+
             return View(restaurants);
         }
 

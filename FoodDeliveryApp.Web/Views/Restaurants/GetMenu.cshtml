@@ -1,7 +1,7 @@
 ﻿@model FoodDeliveryApp.Domain.DomainModels.Restaurant
 
 @{
-    ViewData["Title"] = "Menu";
+    ViewData["Title"] = "Menu";
 }
 
 <h1>Menu</h1>
@@ -11,60 +11,47 @@
 
 @if (Model.FoodItems != null && Model.FoodItems.Any())
 {
-    var counter = 0;
-    <div class="container">
+    var counter = 0;
+    <div class="row">
+        @foreach (var item in Model.FoodItems.OrderByDescending(f => f.TimesOrdered))
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@item.Name">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        @if (item == Model.FoodItems.OrderByDescending(f => f.TimesOrdered).First())
+                        {
+                            <span class="badge bg-success">Most Popular</span>
+                        }
+                        <p class="card-text mt-2">@item.Description</p>
+                        <p class="card-text">Price: $@item.Price.ToString("F2")</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a class="btn btn-primary btn-sm" href="#" onclick="loadModal('@item.Id')">Add to cart</a>
+                        <a asp-controller="FoodItems" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-success btn-sm">Edit</a>
+                        <a asp-controller="FoodItems" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </div>
+            </div>
 
-        @foreach (var item in Model.FoodItems.OrderByDescending(f => f.TimesOrdered))
-        {
-            if (counter % 3 == 0)
-            {
-                @:<div class="row">
-            }
+            @if (counter % 3 == 2)
+            {
+                @:</div><div class="row">
+            }
 
-            <div class="col-md-4 mb-4" style="width: 19rem; height: 40rem">
-                <div class="card" style="height: 100%">
-                    @if (!string.IsNullOrEmpty(item.ImageUrl))
-                    {
-                        <img src="@item.ImageUrl" class="card-img-top" style=" height: 50%" alt="@item.Name">
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@item.Name</h5>
-                        @if (item == Model.FoodItems.OrderByDescending(f => f.TimesOrdered).First())
-                        {
-                            <span class="badge bg-success">Most Popular</span>
-                        }
-                        <p class="card-text">@item.Description</p>
-                        <p class="card-text">Price: $@item.Price.ToString("F2")</p>
-                        <div class="card-footer">
-                           <a class="btn btn-primary" href="#" onclick="loadModal('@item.Id')">Add to cart</a>
-                            <a asp-controller="FoodItems" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-success">Edit</a>
-                            <a asp-controller="FoodItems" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
-                           
-                        </div>
-                      
-                    </div>
-                </div>
-            </div>
-
-           
-
-             @if (counter % 3 == 2)
-             {
-                @:</div>
-             }
-              
-             counter += 1;
-        }
-
-    </div>
+            counter += 1;
+        }
+    </div>
 }
 else
 {
-    <p>No food items available for this restaurant.</p>
+    <p>No food items available for this restaurant.</p>
 }
-<div style="height: 50px">
-    <hr />
-</div> 
+
 <div id="modalPlaceholder"></div>
 
 <script type="text/javascript">
@@ -80,3 +67,18 @@ else
         });
     }
 </script>
+
+<style>
+    .card {
+        height: auto;
+    }
+    .card .card-body {
+        padding: 1rem;
+    }
+    .card-footer {
+        padding: 0.5rem 1rem;
+    }
+    .card img {
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
