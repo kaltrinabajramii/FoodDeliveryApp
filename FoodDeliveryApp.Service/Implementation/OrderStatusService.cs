@@ -65,6 +65,7 @@ namespace FoodDeliveryApp.Service.Implementation
            var checkOrder= this._orderRepository.Get(orderId);
             var loggedInUserId = checkOrder.CustomerId;
             var loggedInUser = this._customerRepository.GetCustomer(loggedInUserId);
+
             if (checkOrder.Status == OrderStatus.Delivered)
             {
                 EmailMessage deliveredEmail= new EmailMessage();

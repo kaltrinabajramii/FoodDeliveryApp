@@ -21,6 +21,7 @@ namespace FoodDeliveryApp.Web.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var order = _customerRepository.GetCustomer(userId);
+            
             var orderId= order.Orders.FirstOrDefault();
 
             _orderStatus.ViewOrderStatus(orderId.Id) ;
