@@ -1,5 +1,6 @@
 ﻿@model FoodDeliveryApp.Domain.DomainModels.Restaurant
-
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<FoodDeliveryApp.Domain.Identity.Customer> SignInManager
 @{
     ViewData["Title"] = "Menu";
 }
@@ -31,7 +32,20 @@
                         <p class="card-text">Price: $@item.Price.ToString("F2")</p>
                     </div>
                     <div class="card-footer d-flex justify-content-between">
-                        <a class="btn btn-primary btn-sm" href="#" onclick="loadModal('@item.Id')">Add to cart</a>
+                          @if (SignInManager.IsSignedIn(User))
+                        {
+                            <a class="btn btn-primary btn-sm" href="#" onclick="loadModal('@item.Id')">Add to cart</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary btn-sm" 
+                               asp-area="Identity" 
+                               asp-page="/Account/Login" 
+                               asp-route-returnUrl="@Url.Action("GetMenu", "Restaurants", new { id = Model.Id })">
+                                Login to add to cart
+                            </a>
+
+                        }
                         <a asp-controller="FoodItems" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-success btn-sm">Edit</a>
                         <a asp-controller="FoodItems" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
                     </div>

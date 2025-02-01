@@ -96,6 +96,13 @@ namespace FoodDeliveryApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddReview([Bind("Rating,Comment,RestaurantId")] AddReviewViewModel reviewDto)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+               
+                var returnUrl = Url.Action("Details", "Restaurants", new { id = reviewDto.RestaurantId });
+                return RedirectToPage("/Account/Login", new { area = "Identity", returnUrl });
+            }
+
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

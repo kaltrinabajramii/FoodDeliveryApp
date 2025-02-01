@@ -141,14 +141,66 @@ namespace FoodDeliveryApp.Web.Controllers
             return View(viewModel);
         }
         [HttpPost]
-        public async Task<IActionResult> AddToCartConfirmed(FoodItemInCart model)
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> AddToCartConfirmed([Bind("FoodItemId,Quantity,SelectedExtras")] AddToCartViewModel model)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            _shoppingCartService.AddToShoppingConfirmed(model, userId);
-            return RedirectToAction("Index", "ShoppingCart");
+            if (!User.Identity.IsAuthenticated)
+            {
+                var foodItem = _foodItemService.GetFoodItemById(model.FoodItemId);
+                return RedirectToPage("/Account/Login", new
+                {
+                    area = "Identity",
+                    returnUrl = Url.Action("GetMenu", "Restaurants", new { id = foodItem.RestaurantId })
+                });
+            }
+
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToPage("/Account/Login");
+                }
+
+                var foodItemInCart = new FoodItemInCart
+                {
+                    FoodItemId = model.FoodItemId,
+                    Quantity = model.Quantity
+                };
+
+                var result = _shoppingCartService.AddToShoppingConfirmed(foodItemInCart, userId, model.SelectedExtras);
+
+                if (result)
+                {
+                    TempData["Success"] = "Item added to cart successfully";
+                    return RedirectToAction("Index", "ShoppingCart");
+                }
+                else
+                {
+                    TempData["Error"] = "Failed to add item to cart";
+                    return RedirectToAction("GetMenu", "Restaurants", new { id = _foodItemService.GetFoodItemById(model.FoodItemId).RestaurantId });
+                }
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while adding item to cart";
+                return RedirectToAction("Index", "Home");
+            }
         }
+
         public async Task<IActionResult> AddToCart(Guid? Id)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                var foodItem1 = _foodItemService.GetFoodItemById((Guid)Id);
+                return RedirectToPage("/Account/Login", new
+                {
+                    area = "Identity",
+                    returnUrl = Url.Action("GetMenu", "Restaurants", new { id = foodItem1.RestaurantId })
+                });
+            }
+
             if (Id == null)
             {
                 return NotFound();
@@ -174,11 +226,33 @@ namespace FoodDeliveryApp.Web.Controllers
         }
         public IActionResult LoadAddToCartModal(Guid foodItemId)
         {
-            var model = new FoodItemInCart
+            if (!User.Identity.IsAuthenticated)
+            {
+                var foodItem = _foodItemService.GetFoodItemById(foodItemId);
+                return Json(new
+                {
+                    redirectToUrl = Url.Page("/Account/Login", new
+                    {
+                        area = "Identity",
+                        returnUrl = Url.Action("GetMenu", "Restaurants", new { id = foodItem.RestaurantId })
+                    })
+                });
+            }
+
+            var foodItemWithExtras = _foodItemService.GetFoodItemById(foodItemId);
+            if (foodItemWithExtras == null)
+            {
+                return NotFound();
+            }
+
+            var model = new AddToCartViewModel
             {
                 FoodItemId = foodItemId,
-                // Initialize other properties as needed
+                FoodItem = foodItemWithExtras,
+                Quantity = 1,
+                SelectedExtras = new List<Guid>()
             };
+
             return PartialView("_AddToCartModal", model);
         }
 

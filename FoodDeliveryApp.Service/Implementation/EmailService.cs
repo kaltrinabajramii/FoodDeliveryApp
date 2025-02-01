@@ -15,7 +15,10 @@ namespace FoodDeliveryApp.Service.Implementation
     public class EmailService : IEmailService
     {
         private readonly ApplicationDbContext _context;
-        public EmailService() { }
+        public EmailService(ApplicationDbContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
         public async Task SendEmailMessage(EmailMessage message)
         {
             var emailmessage = new MimeMessage

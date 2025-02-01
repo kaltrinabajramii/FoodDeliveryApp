@@ -27,12 +27,14 @@ namespace FoodDeliveryApp.Service.Implementation
         private readonly ICustomerRepository _userRepository;
         private readonly IRepository<Order> _orderRepository;
         private readonly IEmailService _emailService;
+        private readonly IExtraRepository _extraInFoodItemRepository;
         
         public ShoppingCartService(IRepository<ShoppingCart> shoppingCartRepository,
             IRepository<FoodItemInCart> foodItemInCartRepository,
             ApplicationDbContext context, IRepository<Order> orderRepository,
             ICustomerRepository userRepository, ILogger<ShoppingCartService> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            IExtraRepository extraInFoodItemRepository)
         {
             _foodItemInCartRepository = foodItemInCartRepository;
             _userRepository = userRepository;
@@ -41,26 +43,69 @@ namespace FoodDeliveryApp.Service.Implementation
             _context = context;
             _orderRepository = orderRepository;
             _emailService = emailService;
+            _extraInFoodItemRepository = extraInFoodItemRepository;
             
         }
-        
-        public bool AddToShoppingConfirmed(FoodItemInCart model, string userId)
-        {
-            var user = this._userRepository.GetCustomer(userId);
-            var shoppingCart = user.ShoppingCart;
-            FoodItemInCart itemToAdd = new FoodItemInCart
-            {
-                Id = Guid.NewGuid(),
-                FoodItem = model.FoodItem,
-                FoodItemId = model.FoodItemId,
-                ShoppingCart = shoppingCart,
-                ShoppingCartId = shoppingCart.Id,
-                Quantity = model.Quantity
-            };
 
-            _foodItemInCartRepository.Insert(itemToAdd);
-            return true;
+        public bool AddToShoppingConfirmed(FoodItemInCart model, string userId, IEnumerable<Guid> selectedExtras = null)
+        {
+            try
+            {
+                var user = _userRepository.GetCustomer(userId);
+                if (user == null)
+                {
+                    _logger.LogError($"User with ID {userId} not found");
+                    return false;
+                }
+
+                var shoppingCart = user.ShoppingCart;
+
+                // Load the food item with its extras
+                var foodItem = _context.FoodItems
+                    .Include(f => f.Extras)
+                        .ThenInclude(e => e.Extra)
+                    .FirstOrDefault(f => f.Id == model.FoodItemId);
+
+                if (foodItem == null)
+                {
+                    _logger.LogError($"Food item with ID {model.FoodItemId} not found");
+                    return false;
+                }
+
+                // Filter the extras to only include selected ones
+                if (selectedExtras != null && selectedExtras.Any())
+                {
+                    foodItem.Extras = foodItem.Extras
+                        .Where(e => selectedExtras.Contains(e.Id))
+                        .ToList();
+                }
+                else
+                {
+                    foodItem.Extras = new List<ExtraInFoodItem>();
+                }
+
+                // Create the cart item
+                var itemToAdd = new FoodItemInCart
+                {
+                    Id = Guid.NewGuid(),
+                    FoodItemId = model.FoodItemId,
+                    ShoppingCart = shoppingCart,
+                    ShoppingCartId = shoppingCart.Id,
+                    Quantity = model.Quantity,
+                    FoodItem = foodItem
+                };
+
+                _foodItemInCartRepository.Insert(itemToAdd);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error adding item to cart: {ex.Message}", ex);
+                return false;
+            }
         }
+
 
         public bool DeleteFromShoppingCart(string userId, Guid FoodId)
         {
@@ -81,6 +126,7 @@ namespace FoodDeliveryApp.Service.Implementation
             return false;
         }
 
+
         public ShoppingCartDTO GetInfoShoppingCart(string userId)
         {
             var user = this._userRepository.GetCustomer(userId);
@@ -96,97 +142,113 @@ namespace FoodDeliveryApp.Service.Implementation
                 };
             }
 
-            // Manually load related entities
+            // Manually load related entities with their extras
             foreach (var foodItemInCart in shoppingCart.FoodItemsInCart)
             {
                 _context.Entry(foodItemInCart)
                     .Reference(fic => fic.FoodItem)
-                .Load();
+                    .Load();
 
                 _context.Entry(foodItemInCart.FoodItem)
                     .Reference(fi => fi.Restaurant)
                     .Load();
+
+                _context.Entry(foodItemInCart.FoodItem)
+                    .Collection(fi => fi.Extras)
+                    .Query()
+                    .Include(e => e.Extra)
+                    .Load();
             }
 
-            double totalPrice = shoppingCart.FoodItemsInCart?
-                .Sum(item => (double)((item.Quantity * item.FoodItem.Price)+item.FoodItem.Restaurant.BaseDeliveryFee)) ?? 0;
+            decimal totalPrice = shoppingCart.FoodItemsInCart
+                .GroupBy(item => item.FoodItem.RestaurantId)
+                .Sum(restaurantGroup =>
+                {
+                    // Calculate items total for this restaurant
+                    var itemsTotal = restaurantGroup.Sum(cartItem =>
+                    {
+                        var itemPrice = cartItem.FoodItem.Price; // Base price
+                        var extrasPrice = cartItem.FoodItem.Extras != null ?
+                            cartItem.FoodItem.Extras.Sum(extra => extra.Price) : 0m;
 
-            ShoppingCartDTO model = new ShoppingCartDTO()
+                        return (itemPrice + extrasPrice) * cartItem.Quantity;
+                    });
+
+                    // Add one delivery fee per restaurant
+                    return itemsTotal + restaurantGroup.First().FoodItem.Restaurant.BaseDeliveryFee;
+                });
+
+            return new ShoppingCartDTO()
             {
                 FoodItemsInCarts = shoppingCart.FoodItemsInCart?.ToList() ?? new List<FoodItemInCart>(),
-                TotalPrice = totalPrice,
+                TotalPrice = (double)totalPrice
             };
-
-            return model;
         }
-
         public bool Order(string userID)
         {
             if (!string.IsNullOrEmpty(userID))
             {
                 var loggedInUser = this._userRepository.GetCustomer(userID);
                 var userCart = loggedInUser.ShoppingCart;
-                /*Email here for order*/
-                EmailMessage emailmessage = new EmailMessage();
-                emailmessage.Subject = "Ordered succesfully!";
-                emailmessage.MailTo = loggedInUser.Email;
 
-                Order order = new Order
+                var order = new Order
                 {
                     Id = Guid.NewGuid(),
                     CustomerId = userID,
                     OrderDate = DateTime.Now,
                     Status = 0,
-                    TotalAmount = userCart.FoodItemsInCart.Sum(f => f.FoodItem.Price * f.Quantity),
+                    TotalAmount = userCart.FoodItemsInCart.Sum(f =>
+                        (f.FoodItem.Price * f.Quantity) +
+                        f.FoodItem.Restaurant.BaseDeliveryFee),
                     RestaurantId = userCart.FoodItemsInCart.First().FoodItem.RestaurantId,
-                   
                 };
-                order.FoodItemsInOrder=userCart.FoodItemsInCart.Select(f=> new FoodItemInOrder
+
+                order.FoodItemsInOrder = userCart.FoodItemsInCart.Select(f => new FoodItemInOrder
                 {
-                    Id=Guid.NewGuid(),
-                    OrderId=order.Id,
-                    FoodItemId=f.FoodItemId,
-                    FoodItem=f.FoodItem,
-                    Quantity=f.Quantity,
-                   
+                    Id = Guid.NewGuid(),
+                    OrderId = order.Id,
+                    FoodItemId = f.FoodItemId,
+                    FoodItem = f.FoodItem,
+                    Quantity = f.Quantity,
                 }).ToList();
 
-                StringBuilder sb = new StringBuilder();
-
-                var totalPrice = 0.0;
-
-                sb.AppendLine("Your order is completed. The order conatins: ");
-                sb.AppendLine();
-
-                foreach(var item in order.FoodItemsInOrder)
+                // Create and send order confirmation email
+                var emailMessage = new EmailMessage
                 {
-                    sb.AppendLine($"- {item.FoodItem.Name} (Quantity: {item.Quantity}, Price: {item.FoodItem.Price:C})");
-                }
-                sb.AppendLine();
-                sb.AppendLine("Total price for your order: "+ order.TotalAmount.ToString("C"));
-                sb.AppendLine();
-                sb.AppendLine("Thank you for ordering!");
+                    Subject = "Order successful!",
+                    MailTo = loggedInUser.Email,
+                    Content = BuildOrderConfirmationEmail(order)
+                };
 
-                emailmessage.Content = sb.ToString();
-                this._emailService.SendEmailMessage(emailmessage);
-                       
+                _emailService.SendEmailMessage(emailMessage);
+                _orderRepository.Insert(order);
 
-                this._orderRepository.Insert(order);
+                // Clear the cart
                 userCart.FoodItemsInCart.Clear();
-                this._userRepository.Update(loggedInUser);
-
-               
-
-
-               
+                _userRepository.Update(loggedInUser);
 
                 return true;
-
-                
-
-                
             }
             return false;
+        }
+
+        private string BuildOrderConfirmationEmail(Order order)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("Your order is completed. The order contains:");
+            sb.AppendLine();
+
+            foreach (var item in order.FoodItemsInOrder)
+            {
+                sb.AppendLine($"- {item.FoodItem.Name} (Quantity: {item.Quantity}, Price: {item.FoodItem.Price:C})");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($"Total price for your order: {order.TotalAmount:C}");
+            sb.AppendLine();
+            sb.AppendLine("Thank you for ordering!");
+
+            return sb.ToString();
         }
     }
 }

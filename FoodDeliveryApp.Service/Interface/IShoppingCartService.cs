@@ -12,7 +12,7 @@ namespace FoodDeliveryApp.Service.Interface
     {
         ShoppingCartDTO GetInfoShoppingCart(string userId);
         bool DeleteFromShoppingCart(string userId, Guid productId);
-        bool AddToShoppingConfirmed(FoodItemInCart model, string userId);
+        bool AddToShoppingConfirmed(FoodItemInCart model, string userId, IEnumerable<Guid> selectedExtras = null);
 
         bool Order(string userID);
     }
