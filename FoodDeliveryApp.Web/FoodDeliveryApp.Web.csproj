@@ -32,4 +32,13 @@
     <ProjectReference Include="..\FoodDeliveryApp.Service\FoodDeliveryApp.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\css\CSS-Style\bckhomescreen.jpg" />
+    <None Include="wwwroot\css\CSS-Style\HomeScreenStyle.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Orders\" />
+  </ItemGroup>
+
 </Project>
