@@ -61,7 +61,7 @@ namespace FoodDeliveryApp.Service.Implementation
             Timer timer = new Timer(timerCallback,
                                     null,
                                     0,
-                                    10000);
+                                    60000);
            var checkOrder= this._orderRepository.Get(orderId);
             var loggedInUserId = checkOrder.CustomerId;
             var loggedInUser = this._customerRepository.GetCustomer(loggedInUserId);
@@ -109,8 +109,7 @@ namespace FoodDeliveryApp.Service.Implementation
             context.Orders.Update(order);
             context.SaveChanges();
         }
-
-        // This code displayes latest order not !!
+        
 
 
 
