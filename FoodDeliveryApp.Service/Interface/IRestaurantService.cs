@@ -17,5 +17,10 @@ namespace FoodDeliveryApp.Service.Interface
         
         Restaurant GetDetails(Guid? id);
         void UpdateExistingRestaurant(Restaurant restaurant);
+
+        Restaurant FindByName(string name);
+        bool CreateRestaurant(Restaurant restaurant);
+
+
     }
 }

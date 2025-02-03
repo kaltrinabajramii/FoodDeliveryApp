@@ -58,9 +58,27 @@ namespace FoodDeliveryApp.Service.Implementation
             _restaurantRepository.Insert(restaurant);
         }
 
-        public void DeleteRestaurant(Guid id)
+        public bool CreateRestaurant(Restaurant restaurant)
+        {
+            try
+            {
+                _restaurantRepository.Insert(restaurant);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+            public void DeleteRestaurant(Guid id)
         {
             _restaurantRepository.Delete(GetDetails(id));
+        }
+
+        public Restaurant FindByName(string name)
+        {
+            return _restaurantRepository.GetAll().FirstOrDefault(r => r.Name == name);
         }
 
         public List<Restaurant> GetAllRestaurants()
