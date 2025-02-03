@@ -20,6 +20,10 @@ namespace FoodDeliveryApp.Web.Controllers
         }
         public IActionResult Index()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity", returnUrl = Url.Action("Index", "ShoppingCart") });
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
