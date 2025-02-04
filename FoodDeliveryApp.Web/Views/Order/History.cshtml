@@ -14,7 +14,6 @@
             <th>Total Amount</th>
             <th>Order Date</th>
             <th>Additional Info</th>
-            <th>Customer</th>
             <th>Restaurant</th>
             <th>Food Items</th>
         </tr>
@@ -28,17 +27,16 @@
                 <td>@order.TotalAmount.ToString("C")</td>
                 <td>@order.OrderDate.ToString("yyyy-MM-dd HH:mm")</td>
                 <td>@order.AdditionalInfo</td>
-                <td>@(order.Customer != null ? order.Customer.Name + " " + order.Customer.Surname : "N/A")</td>
                 <td>@(order.Restaurant != null ? order.Restaurant.Name : "N/A")</td>
                 <td>
                     @if (order.FoodItemsInOrder != null && order.FoodItemsInOrder.Any())
                     {
-                        <ul>
+                        <ol>
                             @foreach (var item in order.FoodItemsInOrder)
                             {
                                 <li>@item.FoodItem.Name - Quantity: @item.Quantity</li>
                             }
-                        </ul>
+                        </ol>
                     }
                     else
                     {

@@ -56,19 +56,19 @@ namespace FoodDeliveryApp.Repository.Implementation
                         PhoneNumber = o.Restaurant.PhoneNumber,                     
 
                     },
-                    //FoodItemsInOrder = o.FoodItemsInOrder.Select(fi => new FoodItemInOrder
-                    //{
+                    FoodItemsInOrder = o.FoodItemsInOrder.Select(fi => new FoodItemInOrder
+                    {
                       
-                    //    Quantity = fi.Quantity,
-                    //    FoodItem = new FoodItem
-                    //    {
-                    //        Id = fi.Id,
-                    //        Name = fi.FoodItem.Name,
-                    //        Price = fi.FoodItem.Price,
-                    //        Description = fi.FoodItem.Description,
+                        Quantity = fi.Quantity,
+                        FoodItem = new FoodItem
+                        {
+                            Id = fi.Id,
+                            Name = fi.FoodItem.Name,
+                            Price = fi.FoodItem.Price,
+                            Description = fi.FoodItem.Description,
 
-                    //    }
-                    //}).ToList()
+                        }
+                    }).ToList()
 
                 })
                 .ToList();

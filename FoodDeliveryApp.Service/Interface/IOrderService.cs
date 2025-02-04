@@ -12,5 +12,7 @@ namespace FoodDeliveryApp.Service.Interface
         Order GetDetailsForOrder(BaseEntity id);
         List<Order> GetAllOrders();
 
+        List<Order> GetOrdersForCustomer(string customerId);
+
     }
 }

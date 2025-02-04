@@ -21,15 +21,13 @@ namespace FoodDeliveryApp.Web.Controllers
         [Route("Orders/OrderHistory/{userId?}")]
         public IActionResult OrderHistory(string userId)
         {
+          
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var userOrders = _orderService.GetAllOrders()
-                .Where(k => k.CustomerId == userId)
-                .ToList();
-
+            var userOrders = _orderService.GetOrdersForCustomer(userId);
             return View("History", userOrders); 
         }
 
