@@ -1,5 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<FoodDeliveryApp.Domain.Identity.Customer> UserManager
+@{
+    var userId = User.Identity.IsAuthenticated ? UserManager.GetUserId(User) : null;
+}
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,7 +42,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="History">Previous orders</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="OrderHistory" asp-route-userId="@userId">Previous orders</a>
                                 </li>
                             </ul>
                         </li>

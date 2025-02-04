@@ -18,18 +18,21 @@ namespace FoodDeliveryApp.Web.Controllers
             _orderService = orderService;
             
         }
-
-        public IActionResult OrderHistory(String? userId)
+        [Route("Orders/OrderHistory/{userId?}")]
+        public IActionResult OrderHistory(string userId)
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToAction("Login", "Account", new { area = "Identity" });
+                return RedirectToAction("Login", "Account");
             }
 
-            var userOrders = _orderService.GetAllOrders().Where(k => k.CustomerId == userId).ToList();
+            var userOrders = _orderService.GetAllOrders()
+                .Where(k => k.CustomerId == userId)
+                .ToList();
 
-            return View(userOrders);
+            return View("History", userOrders); 
         }
-        
+
+
     }
 }
