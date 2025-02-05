@@ -184,50 +184,61 @@ namespace FoodDeliveryApp.Service.Implementation
                 TotalPrice = (double)totalPrice
             };
         }
-        public bool Order(string userID)
+        public async Task<bool> Order(string userID)
         {
             if (!string.IsNullOrEmpty(userID))
             {
-                var loggedInUser = this._userRepository.GetCustomer(userID);
-                var userCart = loggedInUser.ShoppingCart;
-
-                var order = new Order
+                try
                 {
-                    Id = Guid.NewGuid(),
-                    CustomerId = userID,
-                    OrderDate = DateTime.Now,
-                    Status = 0,
-                    TotalAmount = userCart.FoodItemsInCart.Sum(f =>
-                        (f.FoodItem.Price * f.Quantity) +
-                        f.FoodItem.Restaurant.BaseDeliveryFee),
-                    RestaurantId = userCart.FoodItemsInCart.First().FoodItem.RestaurantId,
-                };
+                    var loggedInUser = this._userRepository.GetCustomer(userID);
+                    var userCart = loggedInUser.ShoppingCart;
 
-                order.FoodItemsInOrder = userCart.FoodItemsInCart.Select(f => new FoodItemInOrder
+                    var order = new Order
+                    {
+                        Id = Guid.NewGuid(),
+                        CustomerId = userID,
+                        OrderDate = DateTime.Now,
+                        Status = 0,
+                        TotalAmount = userCart.FoodItemsInCart.Sum(f =>
+                            (f.FoodItem.Price * f.Quantity) +
+                            f.FoodItem.Restaurant.BaseDeliveryFee),
+                        RestaurantId = userCart.FoodItemsInCart.First().FoodItem.RestaurantId,
+                    };
+
+                    order.FoodItemsInOrder = userCart.FoodItemsInCart.Select(f => new FoodItemInOrder
+                    {
+                        Id = Guid.NewGuid(),
+                        OrderId = order.Id,
+                        FoodItemId = f.FoodItemId,
+                        FoodItem = f.FoodItem,
+                        Quantity = f.Quantity,
+                    }).ToList();
+
+                    // Create and send order confirmation email
+                    var emailMessage = new EmailMessage
+                    {
+                        MailTo = loggedInUser.Email,
+                        Subject = "Order Confirmation - Foodie Deliveries",
+                        Content = BuildOrderConfirmationEmail(order)
+                    };
+
+                    // Send email first to ensure customer gets notification
+                    await _emailService.SendEmailMessage(emailMessage);
+
+                    // Save order to database
+                    await _orderRepository.InsertAsync(order);
+
+                    // Clear the shopping cart
+                    userCart.FoodItemsInCart.Clear();
+                    await _userRepository.UpdateAsync(loggedInUser);
+
+                    return true;
+                }
+                catch (Exception ex)
                 {
-                    Id = Guid.NewGuid(),
-                    OrderId = order.Id,
-                    FoodItemId = f.FoodItemId,
-                    FoodItem = f.FoodItem,
-                    Quantity = f.Quantity,
-                }).ToList();
-
-                // Create and send order confirmation email
-                var emailMessage = new EmailMessage
-                {
-                    Subject = "Order successful!",
-                    MailTo = loggedInUser.Email,
-                    Content = BuildOrderConfirmationEmail(order)
-                };
-
-                _emailService.SendEmailMessage(emailMessage);
-                _orderRepository.Insert(order);
-
-                // Clear the cart
-                userCart.FoodItemsInCart.Clear();
-                _userRepository.Update(loggedInUser);
-
-                return true;
+                    _logger.LogError($"Error processing order for user {userID}: {ex.Message}", ex);
+                    return false;
+                }
             }
             return false;
         }
@@ -235,18 +246,35 @@ namespace FoodDeliveryApp.Service.Implementation
         private string BuildOrderConfirmationEmail(Order order)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Your order is completed. The order contains:");
+            sb.AppendLine("Your order has been successfully placed!");
             sb.AppendLine();
+            sb.AppendLine("Order Details:");
+            sb.AppendLine($"Order ID: {order.Id}");
+            sb.AppendLine($"Order Date: {order.OrderDate:g}");
+            sb.AppendLine();
+            sb.AppendLine("Items ordered:");
 
             foreach (var item in order.FoodItemsInOrder)
             {
-                sb.AppendLine($"- {item.FoodItem.Name} (Quantity: {item.Quantity}, Price: {item.FoodItem.Price:C})");
+                var itemTotal = item.FoodItem.Price * item.Quantity;
+                sb.AppendLine($"- {item.FoodItem.Name} x {item.Quantity} @ {item.FoodItem.Price:C} = {itemTotal:C}");
+
+                if (item.FoodItem.Extras != null && item.FoodItem.Extras.Any())
+                {
+                    sb.AppendLine("  Extras:");
+                    foreach (var extra in item.FoodItem.Extras)
+                    {
+                        sb.AppendLine($"    + {extra.Extra.Name} ({extra.Price:C})");
+                    }
+                }
             }
 
             sb.AppendLine();
-            sb.AppendLine($"Total price for your order: {order.TotalAmount:C}");
+            sb.AppendLine($"Delivery Fee: {order.FoodItemsInOrder.First().FoodItem.Restaurant.BaseDeliveryFee:C}");
+            sb.AppendLine($"Total Amount: {order.TotalAmount:C}");
             sb.AppendLine();
-            sb.AppendLine("Thank you for ordering!");
+            sb.AppendLine("Thank you for ordering with Foodie Deliveries!");
+            sb.AppendLine("We'll notify you when your order is ready for delivery.");
 
             return sb.ToString();
         }

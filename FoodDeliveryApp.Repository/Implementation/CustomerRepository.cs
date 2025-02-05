@@ -48,5 +48,15 @@ namespace FoodDeliveryApp.Repository.Implementation
             entities.Update(customer);
             context.SaveChanges();
         }
+
+        public async Task UpdateAsync(Customer customer)
+        {
+            if (customer == null)
+            {
+                throw new ArgumentNullException("customer");
+            }
+            entities.Update(customer);
+            await context.SaveChangesAsync();
+        }
     }
 }

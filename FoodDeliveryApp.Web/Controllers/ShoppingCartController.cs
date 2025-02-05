@@ -1,4 +1,5 @@
 ﻿using FoodDeliveryApp.Domain.DomainModels;
+using FoodDeliveryApp.Domain.Email;
 using FoodDeliveryApp.Repository;
 using FoodDeliveryApp.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,15 @@ namespace FoodDeliveryApp.Web.Controllers
 {
     public class ShoppingCartController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IShoppingCartService _shoppingCartService;
+        private readonly IEmailService _emailService;
 
-        public ShoppingCartController(IShoppingCartService? shoppingCartService)
+        public ShoppingCartController(
+            IShoppingCartService shoppingCartService,
+            IEmailService emailService)
         {
-            _shoppingCartService = shoppingCartService;
+            _shoppingCartService = shoppingCartService ?? throw new ArgumentNullException(nameof(shoppingCartService));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
         public IActionResult Index()
         {
@@ -53,15 +57,16 @@ namespace FoodDeliveryApp.Web.Controllers
                 return RedirectToAction("Index", "ShoppingCart");
             }
         }
-        public Boolean Order() 
+        public async Task<bool> Order()
         {
-            var userId=User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result=this._shoppingCartService.Order(userId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _shoppingCartService.Order(userId);
             return result;
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult PayOrder(string stripeEmail, string stripeToken)
+        public async Task<IActionResult> PayOrder(string stripeEmail, string stripeToken)
         {
             StripeConfiguration.ApiKey = "sk_test_51P9ow2EbutLVS09jca4drAXy47BOqmYvmBOIvBZ3y6sXXc8FOZWTaKP3LuuxV2xeBwxrxg9EgKktiB3kXLr2V55K00xU0sqwii";
             var customerService = new CustomerService();
@@ -83,22 +88,43 @@ namespace FoodDeliveryApp.Web.Controllers
                 Currency = "mkd",
                 Customer = customer.Id
             });
+
             if (charge.Status == "succeeded")
             {
-                this.Order();
+                await this.Order(); // Changed to await the Order call
+
+                var emailMessage = new EmailMessage
+                {
+                    MailTo = stripeEmail,
+                    Subject = "Order Confirmation - Foodie Deliveries",
+                    Content = $"Thank you for your order!\n\n" +
+                             $"Order Total: {order.TotalPrice} MKD\n" +
+                             $"Order Status: Paid\n\n" +
+                             "We'll notify you when your order is ready for delivery.",
+                };
+
+                await _emailService.SendEmailMessage(emailMessage);
+
                 return RedirectToAction("SuccessfulPayment", "ShoppingCart");
             }
-            else {
-                
+            else
+            {
+                var emailMessage = new EmailMessage
+                {
+                    MailTo = stripeEmail,
+                    Subject = "Payment Failed - Foodie Deliveries",
+                    Content = "We're sorry, but your payment could not be processed. Please try again or contact support."
+                };
+
+                await _emailService.SendEmailMessage(emailMessage);
+
                 return RedirectToAction("FailedPayment", "ShoppingCart");
-            
             }
-          
         }
-      
 
 
-        
+
+
 
     }
 }

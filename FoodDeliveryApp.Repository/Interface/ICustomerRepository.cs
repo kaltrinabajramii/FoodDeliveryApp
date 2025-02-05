@@ -11,6 +11,6 @@ namespace FoodDeliveryApp.Repository.Interface
     {
         Customer GetCustomer(string? Id);
          void Update(Customer customer);
-
+        Task UpdateAsync(Customer customer);
     }
 }
