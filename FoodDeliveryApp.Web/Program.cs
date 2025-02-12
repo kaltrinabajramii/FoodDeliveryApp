@@ -35,6 +35,7 @@ builder.Services.AddScoped(typeof(IExtraRepository), typeof(ExtraRepository));
 builder.Services.AddScoped(typeof(IReviewRepository), typeof(ReviewRepository));
 builder.Services.AddScoped(typeof(ICustomerRepository), typeof(CustomerRepository));
 builder.Services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
+builder.Services.AddScoped<IAccommodationRepository, AccommodationRepository>();
 
 builder.Services.AddTransient<IRestaurantService, RestaurantService>();
 builder.Services.AddTransient<IShoppingCartService, ShoppingCartService>();
@@ -43,6 +44,7 @@ builder.Services.AddTransient<IExtraService, ExtraService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<IOrderStatusService, OrderStatusService>();
 builder.Services.AddTransient<IOrderService, OrderService>();
+builder.Services.AddHttpClient();
 
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
