@@ -40,36 +40,45 @@ namespace FoodDeliveryApp.Repository.Implementation
                     Status = o.Status,
                     TotalAmount = o.TotalAmount,
                     OrderDate = o.OrderDate,
-                    Customer = new Customer { 
+                    Customer = new Customer
+                    {
                         Id = o.CustomerId,
-                        Email = o.Customer.Email, 
-                        Name = o.Customer.Name, 
+                        Email = o.Customer.Email,
+                        Name = o.Customer.Name,
                         Surname = o.Customer.Surname,
                         PhoneNumber = o.Customer.PhoneNumber,
-                        Address = o.Customer.Address },
+                        Address = o.Customer.Address
+                    },
                     Restaurant = new Restaurant
                     {
                         Id = o.RestaurantId,
                         Name = o.Restaurant.Name,
                         Address = o.Restaurant.Address,
                         BaseDeliveryFee = o.Restaurant.BaseDeliveryFee,
-                        PhoneNumber = o.Restaurant.PhoneNumber,                     
-
+                        PhoneNumber = o.Restaurant.PhoneNumber,
                     },
                     FoodItemsInOrder = o.FoodItemsInOrder.Select(fi => new FoodItemInOrder
                     {
-                      
                         Quantity = fi.Quantity,
                         FoodItem = new FoodItem
                         {
-                            Id = fi.Id,
+                            Id = fi.FoodItem.Id,
                             Name = fi.FoodItem.Name,
                             Price = fi.FoodItem.Price,
                             Description = fi.FoodItem.Description,
-
+                            Extras = fi.FoodItem.Extras.Select(e => new ExtraInFoodItem
+                            {
+                                Price = e.Price,
+                                Extra = new Extra
+                                {
+                                    Name = e.Extra.Name,
+                                    Id = e.Extra.Id
+                                },
+                                ExtraId = e.ExtraId,
+                                FoodItemId = e.FoodItemId
+                            }).ToList()
                         }
                     }).ToList()
-
                 })
                 .ToList();
         }
