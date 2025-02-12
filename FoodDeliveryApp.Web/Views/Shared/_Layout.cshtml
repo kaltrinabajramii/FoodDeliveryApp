@@ -1,5 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<FoodDeliveryApp.Domain.Identity.Customer> UserManager
+@{
+    var userId = User.Identity.IsAuthenticated ? UserManager.GetUserId(User) : null;
+}
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,12 +40,14 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="orderStatusDropdown">
                                 <li>
-                                    <a class="dropdown-item" asp-area="" asp-controller="ViewStatus" asp-action="Index" id="orderStatusLink">
+                                    <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#orderStatusModal"
+                                       id="orderStatusLink" asp-area="" asp-controller="ViewStatus" asp-action="Index">
                                         Order Status
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-area="" asp-controller="Order" asp-action="History">Previous orders</a>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="OrderHistory"
+                                       asp-route-userId="@userId">Previous orders</a>
                                 </li>
                             </ul>
                         </li>
@@ -64,17 +72,14 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Add this script to handle the modal -->
-    <script type="text/javascript">
+    <script>
         $(document).ready(function () {
-            $('#orderStatusLink').on('click', function (event) {
-                event.preventDefault();
-
+            $('#orderStatusLink').click(function (e) {
+                e.preventDefault();
                 var url = $(this).attr('href');
-
                 $.get(url, function (data) {
-                    $('#orderModal .modal-content').html(data);
-                    $('#orderModal').modal('show');
+                    $('.modal-dialog').html(data);
+                    $('#orderStatusModal').modal('show');
                 });
             });
         });
@@ -83,13 +88,36 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <!-- Modal Placeholder -->
-    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <!-- The content will be loaded here dynamically -->
-            </div>
+   
+    <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <!-- Modal content will be loaded here -->
         </div>
     </div>
 
+
+
+    <style>
+        .progress-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .order-progress .progress {
+            height: 4px;
+            background-color: #e9ecef;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .status-badge {
+            font-size: 0.875rem;
+        }
+    </style>
+
 </body>
+
+
 </html>

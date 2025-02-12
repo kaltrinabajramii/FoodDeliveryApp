@@ -23,7 +23,7 @@ namespace FoodDeliveryApp.Web.Controllers.API
             _restaurantService = restaurantService;
         }
 
-        [HttpGet("orders")]
+        [HttpGet("[action]")]
         public IActionResult GetAllOrders()
         {
 

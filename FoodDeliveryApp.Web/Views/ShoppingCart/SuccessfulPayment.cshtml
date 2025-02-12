@@ -1,8 +1,38 @@
-﻿<div class="bg-body-green">
+﻿<style>
+    .success-container {
+        max-width: 500px;
+        margin: 40px auto;
+        text-align: center;
+        padding: 20px;
+    }
 
-<h1>Succesfully payment! </h1>
-<div class="float-lg-start">
-<a asp-controller="ViewStatus" asp-action="Index" class="btn btn-success">View delivery status</a>
-<a asp-controller="Home" asp-action="Index" class="btn btn-primary">Return to home screen</a>
+    .success-icon {
+        color: #28a745;
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .button-group {
+        margin-top: 30px;
+    }
+
+        .button-group .btn {
+            margin: 0 10px;
+        }
+</style>
+
+<div class="success-container">
+    <div class="card">
+        <div class="card-body">
+            <i class="bi bi-check-circle-fill success-icon"></i>
+            <h2>Payment Successful</h2>
+            <p>Thank you for your order!</p>
+
+            <div class="button-group">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                    Return Home
+                </a>
+            </div>
+        </div>
     </div>
 </div>

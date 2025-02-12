@@ -10,6 +10,7 @@ using FoodDeliveryApp.Service.Implementation;
 using NuGet.Protocol.Core.Types;
 using FoodDeliveryApp.Domain;
 using Stripe;
+using FoodDeliveryApp.Domain.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +49,7 @@ builder.Services.AddHttpClient();
 
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddControllersWithViews().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 

@@ -9,23 +9,49 @@ namespace FoodDeliveryApp.Web.Controllers
     {
         private readonly IOrderStatusService _orderStatus;
         private readonly ICustomerRepository _customerRepository;
-        
+        private readonly IOrderService _orderServie;
 
-        public ViewStatusController(IOrderStatusService orderStatus,ICustomerRepository customerRepository)
+
+        public ViewStatusController(IOrderStatusService orderStatus, ICustomerRepository customerRepository, IOrderService orderService)
         {
             this._orderStatus = orderStatus;
             this._customerRepository = customerRepository;
+            this._orderServie = orderService;
         }
 
         public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var order = _customerRepository.GetCustomer(userId);
-            
-            var orderId= order.Orders.FirstOrDefault();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity", returnUrl = Url.Action("Index", "ViewStatus") });
+            }
 
-            _orderStatus.ViewOrderStatus(orderId.Id) ;
-            return PartialView("_ViewStatusModal",orderId);
+            var customer = _customerRepository.GetCustomer(userId);
+
+            if (customer == null || customer.Orders == null || !customer.Orders.Any())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var customerOrder = customer.Orders
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefault();
+
+            var orderId = new Domain.DomainModels.BaseEntity
+            {
+                Id = customerOrder.Id
+            };
+
+            var order = _orderServie.GetDetailsForOrder(orderId);
+
+            if (order == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            _orderStatus.ViewOrderStatus(order.Id);
+            return PartialView("_ViewStatusModal", order);
         }
     }
 }

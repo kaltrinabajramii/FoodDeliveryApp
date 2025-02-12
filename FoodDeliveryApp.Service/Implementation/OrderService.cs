@@ -1,6 +1,7 @@
 ﻿using FoodDeliveryApp.Domain.DomainModels;
 using FoodDeliveryApp.Repository.Interface;
 using FoodDeliveryApp.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,5 +30,10 @@ namespace FoodDeliveryApp.Service.Implementation
 
             }
 
+        public List<Order> GetOrdersForCustomer(string customerId)
+        {
+            return orderRepository.GetAllOrders().Where(o => o.Customer.Id == customerId).ToList();
+
         }
+    }
     }

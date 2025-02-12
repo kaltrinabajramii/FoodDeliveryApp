@@ -14,6 +14,6 @@ namespace FoodDeliveryApp.Service.Interface
         bool DeleteFromShoppingCart(string userId, Guid productId);
         bool AddToShoppingConfirmed(FoodItemInCart model, string userId, IEnumerable<Guid> selectedExtras = null);
 
-        bool Order(string userID);
+        Task<bool> Order(string userId);
     }
 }

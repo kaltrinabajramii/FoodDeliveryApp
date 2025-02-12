@@ -14,7 +14,8 @@ namespace FoodDeliveryApp.Repository.Interface
         void Insert(T entity);
         void Update(T entity);
         void Delete(T entity);
-
+        Task InsertAsync(T entity);
+        Task UpdateAsync(T entity);
 
     }
 }
